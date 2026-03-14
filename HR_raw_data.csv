@@ -1,0 +1,22 @@
+Employee_ID,Name,Age,Gender,Department,Job_Title,Salary,Hire_Date,Performance_Rating,Overtime_Hours,Attrition
+E001,Ali Ahmad,29,Male,HR,HR Executive,4500,12/03/2021,4,12,No
+E002,Siti Nur,34,F,Finance,Accountant,5200,2020-07-15,5,8,No
+E003,John Tan,-25,male,IT,Software Engineer,6800,15-08-2019,3,-5,No
+E004,Amanda Lee,41,Female,Human Resource,HR Manager,9000,March 3 2018,4,10,No
+E005,Raj Kumar,38,M,IT,Senior Developer,,2017/11/25,5,15,No
+E006,Chen Wei,27,female,Finance,accountant,4800,01-02-2022,,6,Yes
+E007,Farah Aziz,30,FEMALE,Marketing,Marketing Exec,3500,2021.05.14,3,9,No
+E008,Michael Ong,29,Male,IT,Software engineer,6800,2019-08-15,3,5,No
+E008,Michael Ong,29,Male,IT,Software engineer,6800,2019-08-15,3,5,No
+E009,Nur Aisyah,,-,HR,HR Executive,4000,2022/09/01,4,7,No
+E010,David Lim,45,M,Finance,Finance Manager,15000,2015-12-01,5,20,No
+E011,Sarah Wong,23,Female,Marketing,Marketing Executive,-3200,2023-01-10,2,4,Yes
+E012,Ahmad Zaki,31,Male,IT,Data Analyst,5900,13/13/2020,4,8,No
+E013,Jessica Tan,28,f,Human Resources,HR Exec,4300,2020-02-30,3,6,No
+E014,Kevin Lee,52,Male,Finance,Accountant,5100,2010-06-18,6,3,No
+E015,Linda Khoo,36,Female,IT,Project Manager,11000,2016-04-25,4,,No
+E016,Ravi Chandran,29,M,Marketing,marketing exec,3600,2021-07-07,3,11,No
+E017,Emily Tan,33,Female,IT,Software Engineer,7200,2018/03/14,4,9,No
+E018,Hafiz Rahman,-40,Male,HR,HR Manager,8500,2014-10-10,5,14,No
+E019,Grace Lim,26,F,Finance,Accountant,4700,2022-11-05,3,5,Yes
+E020,Daniel Wong,39,Male,IT,Senior Developer,150000,2012-09-09,4,18,No

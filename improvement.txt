@@ -1,0 +1,21 @@
+Must-Have Considerations
+
+Data privacy/compliance: Treat HR CSVs as sensitive PII; enforce encryption in transit (HTTPS) and at rest, plus retention/deletion rules (PDPA/GDPR/local law).
+Access control: Add login + role-based access (HR/Admin only); never expose upload/download endpoints publicly without auth.
+Auditability: Log who uploaded, when cleaning ran, what rules changed, and what records were modified (without logging full sensitive data).
+Data quality governance: Keep cleaning rules configurable (gender/job-title mappings, date formats) and versioned so results are consistent and explainable.
+No risky inference: Do not infer gender from names; unresolved values should remain Unknown unless a trusted source provides it.
+Technical Deployment
+
+Environment reproducibility: Pin dependency versions and deploy with a container (Docker) or managed Streamlit host.
+Runtime controls: Set upload size limits, timeouts, memory limits, and queueing for concurrent users.
+Storage strategy: Use temporary secure storage for uploads and auto-delete processed files after download.
+Monitoring: Add health checks, error tracking, and usage metrics (failed parses, missing columns, parse-rate by date format).
+Backup/recovery: Back up configs and rule mappings; prepare rollback plan for bad releases.
+
+Production-Ready Next Steps
+
+Add user login/access control.
+Add audit logging (who uploaded, when, what rules changed values).
+Add more automated tests with real messy HR samples.
+Add deployment hardening (file size limits, monitoring, backup/rollback).
