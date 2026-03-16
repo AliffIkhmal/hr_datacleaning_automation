@@ -63,7 +63,7 @@ The HR tool is implemented as an adapter around the existing HR pipeline:
 ## Current Status
 
 - HR Data Cleaner: implemented and integrated
-- Sales Data Cleaner: scaffolded placeholder
+- Sales Data Cleaner: implemented and integrated
 - Manufacturing Data Cleaner: scaffolded placeholder
 - Logistics Data Cleaner: scaffolded placeholder
 - E-commerce Data Cleaner: scaffolded placeholder
