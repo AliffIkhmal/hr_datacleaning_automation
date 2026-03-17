@@ -93,10 +93,8 @@ The HR cleaner is built around a dedicated Malaysian HR pipeline:
 
 ## Current Status
 
-| Cleaner | Status |
-|---|---|
-| HR Data Cleaner | Fully implemented |
-| Sales Data Cleaner | Fully implemented |
-| Manufacturing Data Cleaner | Fully implemented |
-| Logistics Data Cleaner | Fully implemented |
-| E-commerce Data Cleaner | Fully implemented |
+- HR Data Cleaner: implemented and integrated
+- Sales Data Cleaner: scaffolded placeholder
+- Manufacturing Data Cleaner: scaffolded placeholder
+- Logistics Data Cleaner: scaffolded placeholder
+- E-commerce Data Cleaner: scaffolded placeholder
