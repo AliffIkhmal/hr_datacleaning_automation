@@ -5,6 +5,7 @@ import pandas as pd
 from tools.hr_cleaning.cleaner import clean_hr_data
 from tools.hr_cleaning.report import generate_cleaning_report
 from tools.base import BaseCleaner, CleaningResult
+from tools.cleaning_utils import round_numeric_columns
 
 
 class HRCleaner(BaseCleaner):
@@ -14,6 +15,7 @@ class HRCleaner(BaseCleaner):
 
     def run(self, df: pd.DataFrame) -> CleaningResult:
         cleaned_df, stats, outliers_df = clean_hr_data(df)
+        cleaned_df = round_numeric_columns(cleaned_df)
         report_df = generate_cleaning_report(stats)
         messages = []
         if not outliers_df.empty:

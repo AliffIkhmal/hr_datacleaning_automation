@@ -12,6 +12,7 @@ from tools.cleaning_utils import (
     fill_missing,
     normalize_missing_placeholders,
     remove_duplicates,
+    round_numeric_columns,
     standardize_categoricals,
     standardize_dates,
     validate_ranges,
@@ -47,6 +48,7 @@ class ManufacturingCleaner(BaseCleaner):
             col_map[c] for c in (
                 "Planned_Quantity", "Produced_Quantity", "Scrap_Quantity",
                 "Cycle_Time_Minutes", "Downtime_Minutes", "Unit_Cost",
+                "Temperature",
             )
             if col_map.get(c) is not None
         ]
@@ -55,21 +57,26 @@ class ManufacturingCleaner(BaseCleaner):
         # --- 5. Range validation ---
         range_rules: dict[str, tuple[float | None, float | None]] = {}
         if col_map.get("Defect_Rate"):
-            range_rules[col_map["Defect_Rate"]] = (0, 100)
+            dr_col = col_map["Defect_Rate"]
+            dr_series = pd.to_numeric(working[dr_col], errors="coerce").dropna()
+            if not dr_series.empty and dr_series.max() <= 1.0:
+                working[dr_col] = pd.to_numeric(working[dr_col], errors="coerce") * 100
+                messages.append("Defect_Rate detected as ratio (0–1); converted to percentage (0–100).")
+            range_rules[dr_col] = (0, 100)
         if col_map.get("Yield_Percent"):
             range_rules[col_map["Yield_Percent"]] = (0, 100)
         working, range_clipped = validate_ranges(working, range_rules)
 
-        # --- 6. Outlier capping on cycle time and unit cost ---
+        # --- 6. Outlier capping on cycle time, unit cost, and temperature ---
         outlier_cols = [
-            col_map[c] for c in ("Cycle_Time_Minutes", "Unit_Cost", "Downtime_Minutes")
+            col_map[c] for c in ("Cycle_Time_Minutes", "Unit_Cost", "Downtime_Minutes", "Temperature")
             if col_map.get(c) is not None
         ]
         working, outliers_df, outliers_detected = cap_outliers_iqr(working, outlier_cols)
         if not outliers_df.empty:
             messages.append(f"{outliers_detected} production outlier(s) capped using IQR method.")
 
-        # --- 7. Standardise categorical columns ---
+        # --- 7. Standardize categorical columns ---
         cat_cols = [
             col_map[c] for c in (
                 "Product_Name", "Product_Category", "Shift",
@@ -81,6 +88,9 @@ class ManufacturingCleaner(BaseCleaner):
 
         # --- 8. Fill missing values ---
         working, missing_fixed = fill_missing(working)
+
+        # --- 9. Round numeric columns to whole numbers ---
+        working = round_numeric_columns(working)
 
         # --- Build report ---
         stats = {

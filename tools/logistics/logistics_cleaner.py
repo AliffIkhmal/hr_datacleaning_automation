@@ -7,6 +7,7 @@ from core.report_generator import build_report_dataframe
 from core.schema_detector import resolve_columns
 from tools.base import BaseCleaner, CleaningResult
 from tools.cleaning_utils import (
+    round_numeric_columns,
     cap_outliers_iqr,
     correct_negatives,
     fill_missing,
@@ -81,6 +82,9 @@ class LogisticsCleaner(BaseCleaner):
 
         # --- 8. Fill missing values ---
         working, missing_fixed = fill_missing(working)
+
+        # --- 9. Round numeric columns to whole numbers ---
+        working = round_numeric_columns(working)
 
         # --- Build report ---
         stats = {

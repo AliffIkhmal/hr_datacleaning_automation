@@ -324,7 +324,7 @@ MANUFACTURING_SCHEMA: IndustrySchema = {
         },
         "Produced_Quantity": {
             "type": "numeric",
-            "aliases": {"produced_quantity", "produced_qty", "actual_quantity", "output_qty"},
+            "aliases": {"produced_quantity", "produced_qty", "actual_quantity", "output_qty", "production_count"},
             "description": "Actual units produced.",
             "valid_range": (0, None),
         },
@@ -363,6 +363,11 @@ MANUFACTURING_SCHEMA: IndustrySchema = {
             "aliases": {"unit_cost", "cost_per_unit", "production_cost", "manufacturing_cost"},
             "description": "Cost per unit produced.",
             "valid_range": (0, None),
+        },
+        "Temperature": {
+            "type": "numeric",
+            "aliases": {"temperature", "temp", "machine_temp", "operating_temp"},
+            "description": "Machine or process temperature.",
         },
         # Categorical
         "Product_Name": {
@@ -674,7 +679,7 @@ ECOMMERCE_SCHEMA: IndustrySchema = {
         },
         "Product_Name": {
             "type": "categorical",
-            "aliases": {"product_name", "item_name", "product_title"},
+            "aliases": {"product_name", "item_name", "product_title", "product"},
             "description": "Product display name.",
         },
         "Product_Category": {
@@ -732,6 +737,13 @@ ECOMMERCE_SCHEMA: IndustrySchema = {
             "type": "date",
             "aliases": {"return_date", "refund_date", "rma_date"},
             "description": "Date a return was initiated.",
+        },
+        # Ratings
+        "Customer_Rating": {
+            "type": "numeric",
+            "aliases": {"customer_rating", "rating", "review_rating", "star_rating", "score"},
+            "description": "Customer satisfaction rating.",
+            "valid_range": (1, 5),
         },
     },
 }

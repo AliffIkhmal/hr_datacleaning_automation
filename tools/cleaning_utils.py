@@ -11,6 +11,7 @@ These are generic operations that apply to any tabular dataset:
 
 from __future__ import annotations
 
+import re
 from typing import Any, Sequence
 
 import numpy as np
@@ -106,6 +107,8 @@ def cap_outliers_iqr(
         if col not in out.columns or not pd.api.types.is_numeric_dtype(out[col]):
             continue
         series = pd.to_numeric(out[col], errors="coerce")
+        if series.dropna().count() < 10:
+            continue
         q1 = series.quantile(0.25)
         q3 = series.quantile(0.75)
         iqr = q3 - q1
@@ -153,14 +156,38 @@ def validate_ranges(
 # Categorical standardisation
 # ------------------------------------------------------------------
 
+def _smart_title(value: str) -> str:
+    """Title-case each word, preserving all-uppercase words (acronyms/codes like HR, ID, USA)."""
+    return " ".join(
+        word if word.isupper() and len(word) > 1 else word.title()
+        for word in value.strip().split()
+    )
+
+
 def standardize_categoricals(df: pd.DataFrame, columns: Sequence[str]) -> pd.DataFrame:
     out = df.copy()
     for col in columns:
         if col not in out.columns:
             continue
         out[col] = out[col].apply(
-            lambda x: x.strip().title() if isinstance(x, str) else x
+            lambda x: _smart_title(x) if isinstance(x, str) else x
         )
+    return out
+
+
+# ------------------------------------------------------------------
+# Round all numeric columns to zero decimal places
+# ------------------------------------------------------------------
+
+def round_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Round every numeric column to 0 decimal places and convert to nullable Int64."""
+    out = df.copy()
+    for col in out.select_dtypes(include=["number"]).columns:
+        out[col] = out[col].round(0)
+        try:
+            out[col] = out[col].astype("Int64")
+        except (ValueError, TypeError):
+            pass
     return out
 
 
@@ -168,15 +195,33 @@ def standardize_categoricals(df: pd.DataFrame, columns: Sequence[str]) -> pd.Dat
 # Fill missing numeric with median, categorical with mode
 # ------------------------------------------------------------------
 
+def _looks_like_identifier(col: str, series: pd.Series) -> bool:
+    """Return True if the column is likely an identifier that should not be imputed."""
+    norm = re.sub(r"[^a-z0-9]+", "_", col.strip().lower()).strip("_")
+    id_suffixes = ("_id", "_code", "_no", "_number", "_sku")
+    if norm in ("id", "code", "no", "number", "sku") or any(norm.endswith(s) for s in id_suffixes):
+        return True
+    # High-uniqueness heuristic applies only to string columns (continuous numeric
+    # fields like Temperature are also nearly all-unique but must be imputed).
+    if pd.api.types.is_numeric_dtype(series):
+        return False
+    non_null = series.dropna()
+    return len(non_null) >= 10 and float(non_null.nunique() / len(non_null)) >= 0.95
+
+
 def fill_missing(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     out = df.copy()
     before = int(out.isna().sum().sum())
 
     for col in out.select_dtypes(include=["number"]).columns:
+        if _looks_like_identifier(col, out[col]):
+            continue
         median = out[col].median()
         out[col] = out[col].fillna(median)
 
     for col in out.select_dtypes(include=["object", "category"]).columns:
+        if _looks_like_identifier(col, out[col]):
+            continue
         mode = out[col].mode(dropna=True)
         if not mode.empty:
             out[col] = out[col].fillna(mode.iloc[0])

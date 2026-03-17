@@ -7,6 +7,7 @@ from core.report_generator import build_report_dataframe
 from core.schema_detector import resolve_columns
 from tools.base import BaseCleaner, CleaningResult
 from tools.cleaning_utils import (
+    round_numeric_columns,
     cap_outliers_iqr,
     correct_negatives,
     fill_missing,
@@ -57,6 +58,8 @@ class EcommerceCleaner(BaseCleaner):
         range_rules: dict[str, tuple[float | None, float | None]] = {}
         if col_map.get("Quantity"):
             range_rules[col_map["Quantity"]] = (1, 10000)
+        if col_map.get("Customer_Rating"):
+            range_rules[col_map["Customer_Rating"]] = (1, 5)
         working, range_clipped = validate_ranges(working, range_rules)
 
         # --- 6. Outlier capping on order value and unit price ---
@@ -82,12 +85,34 @@ class EcommerceCleaner(BaseCleaner):
         # --- 8. Fill missing values ---
         working, missing_fixed = fill_missing(working)
 
+        # --- 9. Recalculate Order_Value as abs(Price × Quantity) ---
+        val_col = col_map.get("Order_Value")
+        price_col = col_map.get("Unit_Price")
+        qty_col = col_map.get("Quantity")
+        derived_count = 0
+        if price_col and qty_col:
+            can_calc = working[price_col].notna() & working[qty_col].notna()
+            derived_count = int(can_calc.sum())
+            # If Order_Value column doesn't exist yet, create it
+            if val_col is None:
+                val_col = "Order_Value"
+                working[val_col] = pd.NA
+            if derived_count:
+                working.loc[can_calc, val_col] = (
+                    working.loc[can_calc, price_col] * working.loc[can_calc, qty_col]
+                ).abs()
+                messages.append(f"{derived_count} order value(s) calculated from price × quantity.")
+
+        # --- 10. Round numeric columns to whole numbers ---
+        working = round_numeric_columns(working)
+
         # --- Build report ---
         stats = {
             "total_rows": len(working),
             "duplicates_removed": dupes_removed,
             "dates_formatted": dates_formatted,
             "negatives_corrected": negatives_fixed,
+            "order_value_derived": derived_count,
             "range_values_clipped": range_clipped,
             "outliers_detected": outliers_detected,
             "missing_values_fixed": missing_fixed,

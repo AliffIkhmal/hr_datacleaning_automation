@@ -7,6 +7,7 @@ from core.report_generator import build_report_dataframe
 from core.schema_detector import resolve_columns
 from tools.base import BaseCleaner, CleaningResult
 from tools.cleaning_utils import (
+    round_numeric_columns,
     cap_outliers_iqr,
     correct_negatives,
     fill_missing,
@@ -20,20 +21,20 @@ from tools.cleaning_utils import (
 
 class SalesCleaner(BaseCleaner):
     tool_name = "Sales Data Cleaner"
-    description = "Cleans sales/revenue datasets: deduplication, date formatting, outlier capping, category standardisation."
+    description = "Clean sales datasets: deduplication, date formatting, outlier capping, category standardization."
     implemented = True
 
     def run(self, df: pd.DataFrame) -> CleaningResult:
         col_map = resolve_columns(df, SALES_SCHEMA)
         messages: list[str] = []
 
-        # --- 1. Normalise missing placeholders ---
+        # --- 1. Normalize missing placeholders ---
         working = normalize_missing_placeholders(df.copy())
 
         # --- 2. Remove duplicates ---
         working, dupes_removed = remove_duplicates(working)
 
-        # --- 3. Standardise date columns ---
+        # --- 3. Standardize date columns ---
         date_cols = [
             col_map[c] for c in ("Order_Date", "Invoice_Date", "Close_Date", "Delivery_Date")
             if col_map.get(c) is not None
@@ -91,6 +92,9 @@ class SalesCleaner(BaseCleaner):
                     working.loc[can_calc, price_col] * working.loc[can_calc, qty_col]
                 ).abs()
                 messages.append(f"{derived_count} revenue value(s) calculated from price × quantity.")
+
+        # --- 10. Round numeric columns to whole numbers ---
+        working = round_numeric_columns(working)
 
         # --- Build report ---
         stats = {
