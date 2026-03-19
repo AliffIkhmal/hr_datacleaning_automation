@@ -104,7 +104,7 @@ class EcommerceCleaner(BaseCleaner):
                 messages.append(f"{derived_count} order value(s) calculated from price × quantity.")
 
         # --- 10. Round numeric columns to whole numbers ---
-        working = round_numeric_columns(working)
+        working = round_numeric_columns(working, decimals=2)
 
         # --- Build report ---
         stats = {

@@ -12,19 +12,13 @@ These are generic operations that apply to any tabular dataset:
 from __future__ import annotations
 
 import re
-from typing import Any, Sequence
+from typing import Sequence
 
 import numpy as np
 import pandas as pd
 
 
 MISSING_PLACEHOLDERS = {"", "-", "--", "na", "n/a", "nan", "null", "none", "missing", "undefined"}
-
-
-def _normalize_text(value: Any) -> str:
-    if pd.isna(value):
-        return ""
-    return str(value).strip().lower()
 
 
 # ------------------------------------------------------------------
@@ -34,9 +28,9 @@ def _normalize_text(value: Any) -> str:
 def normalize_missing_placeholders(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     for col in out.select_dtypes(include=["object", "category"]).columns:
-        out[col] = out[col].apply(
-            lambda x: np.nan if _normalize_text(x) in MISSING_PLACEHOLDERS else x
-        )
+        # Vectorized: astype(str) turns NaN→"nan" which is in MISSING_PLACEHOLDERS.
+        lowered = out[col].astype(str).str.strip().str.lower()
+        out.loc[lowered.isin(MISSING_PLACEHOLDERS), col] = np.nan
     return out
 
 
@@ -169,9 +163,10 @@ def standardize_categoricals(df: pd.DataFrame, columns: Sequence[str]) -> pd.Dat
     for col in columns:
         if col not in out.columns:
             continue
-        out[col] = out[col].apply(
-            lambda x: _smart_title(x) if isinstance(x, str) else x
-        )
+        # Apply only to non-null rows; .map() is faster than .apply() for element-wise ops.
+        mask = out[col].notna()
+        if mask.any():
+            out.loc[mask, col] = out[col][mask].map(_smart_title)
     return out
 
 
@@ -179,15 +174,17 @@ def standardize_categoricals(df: pd.DataFrame, columns: Sequence[str]) -> pd.Dat
 # Round all numeric columns to zero decimal places
 # ------------------------------------------------------------------
 
-def round_numeric_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Round every numeric column to 0 decimal places and convert to nullable Int64."""
+def round_numeric_columns(df: pd.DataFrame, decimals: int = 0) -> pd.DataFrame:
+    """Round every numeric column to `decimals` decimal places.
+    When decimals=0, columns are also cast to nullable Int64."""
     out = df.copy()
     for col in out.select_dtypes(include=["number"]).columns:
-        out[col] = out[col].round(0)
-        try:
-            out[col] = out[col].astype("Int64")
-        except (ValueError, TypeError):
-            pass
+        out[col] = out[col].round(decimals)
+        if decimals == 0:
+            try:
+                out[col] = out[col].astype("Int64")
+            except (ValueError, TypeError):
+                pass
     return out
 
 
