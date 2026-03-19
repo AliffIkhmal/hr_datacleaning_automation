@@ -21,7 +21,9 @@ from tools.cleaning_utils import (
 
 class ManufacturingCleaner(BaseCleaner):
     tool_name = "Manufacturing Data Cleaner"
-    description = "Cleans production/quality datasets: defect-rate validation, cycle-time outliers, date formatting, deduplication."
+    description = ("Cleans manufacturing and production datasets. Corrects negative values in temperature and output fields, "
+                   "auto-detects and converts defect rate from ratio to percentage, caps cycle-time and temperature outliers, "
+                   "standardises production dates, and fills missing quality metrics using column medians.")
     implemented = True
 
     def run(self, df: pd.DataFrame) -> CleaningResult:

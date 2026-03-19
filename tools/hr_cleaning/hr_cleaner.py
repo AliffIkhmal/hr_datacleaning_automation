@@ -10,7 +10,9 @@ from tools.cleaning_utils import round_numeric_columns
 
 class HRCleaner(BaseCleaner):
     tool_name = "HR Data Cleaner"
-    description = "Uses the existing HR cleaning rules for employee-oriented datasets."
+    description = ("Cleans employee HR datasets. Handles missing values in salary, age, and performance fields, "
+                   "standardises gender and department labels, infers missing gender from Malaysian names, "
+                   "corrects date formats, removes duplicates, and flags outliers in compensation and overtime data.")
     implemented = True
 
     def run(self, df: pd.DataFrame) -> CleaningResult:

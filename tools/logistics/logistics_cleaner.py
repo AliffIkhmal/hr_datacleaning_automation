@@ -21,7 +21,9 @@ from tools.cleaning_utils import (
 
 class LogisticsCleaner(BaseCleaner):
     tool_name = "Logistics Data Cleaner"
-    description = "Cleans shipment/delivery datasets: weight & distance validation, delay detection, date formatting, deduplication."
+    description = ("Cleans shipment and delivery datasets. Corrects negative distance and delivery-time values, "
+                   "standardises shipment and delivery dates to YYYY-MM-DD, caps weight and time outliers, "
+                   "fills missing carrier and status fields, and removes duplicate shipment records.")
     implemented = True
 
     def run(self, df: pd.DataFrame) -> CleaningResult:

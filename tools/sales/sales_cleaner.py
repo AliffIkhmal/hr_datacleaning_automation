@@ -21,7 +21,9 @@ from tools.cleaning_utils import (
 
 class SalesCleaner(BaseCleaner):
     tool_name = "Sales Data Cleaner"
-    description = "Clean sales datasets: deduplication, date formatting, outlier capping, category standardization."
+    description = ("Cleans sales transaction datasets. Removes duplicates, standardises order dates, "
+                   "corrects negative prices and quantities, caps revenue outliers, recalculates Total Amount "
+                   "from Price × Quantity, and normalises product category and channel labels.")
     implemented = True
 
     def run(self, df: pd.DataFrame) -> CleaningResult:

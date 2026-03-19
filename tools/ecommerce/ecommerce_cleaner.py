@@ -21,7 +21,9 @@ from tools.cleaning_utils import (
 
 class EcommerceCleaner(BaseCleaner):
     tool_name = "E-commerce Data Cleaner"
-    description = "Cleans order/transaction datasets: order-value outliers, quantity validation, date formatting, deduplication."
+    description = ("Cleans e-commerce order datasets. Removes duplicate orders, corrects negative prices and quantities, "
+                   "validates customer ratings within the 1–5 scale, recalculates Order Value from Price × Quantity, "
+                   "standardises order dates, and normalises product category and order status labels.")
     implemented = True
 
     def run(self, df: pd.DataFrame) -> CleaningResult:
