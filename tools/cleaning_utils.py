@@ -179,7 +179,8 @@ def round_numeric_columns(df: pd.DataFrame, decimals: int = 0) -> pd.DataFrame:
     When decimals=0, columns are also cast to nullable Int64."""
     out = df.copy()
     for col in out.select_dtypes(include=["number"]).columns:
-        out[col] = out[col].round(decimals)
+        # Upcast to float64 first so float32 precision issues don't survive rounding.
+        out[col] = out[col].astype("float64").round(decimals)
         if decimals == 0:
             try:
                 out[col] = out[col].astype("Int64")
