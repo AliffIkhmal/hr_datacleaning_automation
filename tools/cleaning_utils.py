@@ -151,9 +151,11 @@ def validate_ranges(
 # ------------------------------------------------------------------
 
 def _smart_title(value: str) -> str:
-    """Title-case each word, preserving all-uppercase words (acronyms/codes like HR, ID, USA)."""
+    """Title-case each word, preserving genuine short acronyms (≤3 chars, e.g. HR, USA, TV, COD).
+    Longer all-uppercase words (e.g. STORE, ONLINE) are treated as poorly cased data
+    and will be title-cased normally."""
     return " ".join(
-        word if word.isupper() and len(word) > 1 else word.title()
+        word if (word.isupper() and 2 <= len(word) <= 3) else word.title()
         for word in value.strip().split()
     )
 
