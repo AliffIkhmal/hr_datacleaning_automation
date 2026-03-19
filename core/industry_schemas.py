@@ -144,7 +144,7 @@ SALES_SCHEMA: IndustrySchema = {
     "min_required": 4,
     "required_columns": [
         "Sales_ID", "Order_ID", "Customer_ID", "Revenue",
-        "Quantity_Sold", "Product_Category", "Order_Date",
+        "Quantity_Sold", "Product_Category", "Order_Date", "Sales_Channel",
     ],
     "columns": {
         # Identifiers
@@ -235,7 +235,7 @@ SALES_SCHEMA: IndustrySchema = {
         },
         "Product_Category": {
             "type": "categorical",
-            "aliases": {"product_category", "category", "item_category", "product_type", "product"},
+            "aliases": {"product_category", "category", "item_category", "product_type"},
             "description": "Product grouping or category.",
         },
         "Deal_Stage": {
@@ -656,7 +656,7 @@ ECOMMERCE_SCHEMA: IndustrySchema = {
         },
         "Order_Value": {
             "type": "numeric",
-            "aliases": {"order_value", "total_amount", "order_total", "grand_total", "total_price"},
+            "aliases": {"order_value", "order_total", "grand_total", "total_price"},
             "description": "Total order value.",
             "valid_range": (0, None),
         },

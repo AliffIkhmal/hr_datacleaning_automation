@@ -178,16 +178,29 @@ def resolve_columns(
 
 
 def detect_industry(df: pd.DataFrame) -> str | None:
-    """Return the best-matching industry name, or None if no schema matches."""
+    """Return the best-matching industry name, or None if no schema matches.
+
+    Primary score: number of required columns matched.
+    Tie-breaker: total columns matched (including non-required), favouring
+    the schema whose full column pool aligns best with the dataset.
+    """
     best_industry: str | None = None
-    best_score = 0
+    best_required = 0
+    best_total = 0
 
     for name, schema in INDUSTRY_SCHEMAS.items():
         col_map = resolve_columns(df, schema)
         required = schema["required_columns"]
-        matched = sum(1 for r in required if col_map.get(r) is not None)
-        if matched >= schema["min_required"] and matched > best_score:
-            best_score = matched
+        required_matched = sum(1 for r in required if col_map.get(r) is not None)
+        if required_matched < schema["min_required"]:
+            continue
+        total_matched = sum(1 for v in col_map.values() if v is not None)
+        if (
+            required_matched > best_required
+            or (required_matched == best_required and total_matched > best_total)
+        ):
+            best_required = required_matched
+            best_total = total_matched
             best_industry = name
 
     return best_industry
